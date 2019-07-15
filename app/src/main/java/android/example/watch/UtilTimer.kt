@@ -4,10 +4,11 @@ import android.content.Context
 import android.preference.PreferenceManager
 
 @Suppress("DEPRECATION")
-class Util {
+class UtilTimer {
     companion object{
         private val KEY_TIMER = "timer"
         private val KEY_MAX_SECONDS = "maxsec"
+        //TimeForTimer - здесь храним/берем значение таймера перед/после pause
         fun getTimeForTimer(context: Context) : Long{
             val preferences = PreferenceManager.getDefaultSharedPreferences(context)
             return preferences.getLong(KEY_TIMER, 0)
@@ -17,6 +18,7 @@ class Util {
             editor.putLong(KEY_TIMER, seconds)
             editor.apply()
         }
+        //MaxSecondsForTimer - здесь храним/берем максимальное значение таймера, например, для перезапуска
         fun getMaxSecondsForTimer(context: Context) : Long{
             val preferences = PreferenceManager.getDefaultSharedPreferences(context)
             return preferences.getLong(KEY_MAX_SECONDS, 0)

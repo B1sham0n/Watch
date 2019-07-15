@@ -11,4 +11,5 @@
     <string name="menu_timer">Timer</string>
     <string name="menu_about">Adout</string>
     <string name="title_activity_timer">TimerActivity</string>
+    <string name="title_activity_stopwatch">Stopwatch</string>
 </resources>

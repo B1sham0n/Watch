@@ -1,52 +1,66 @@
 package android.example.watch
 
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
-import com.google.android.material.snackbar.Snackbar
+import android.view.View
+import android.widget.NumberPicker
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity;
 
 import kotlinx.android.synthetic.main.activity_timer.*
 import kotlinx.android.synthetic.main.content_timer.*
+import android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+import android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+
+
 
 class TimerActivity : AppCompatActivity() {
     private lateinit var timer: CountDownTimer
     private var timerState = TimerState.Stopped
-    var secondsRemaining: Long = 0
+    var secondsRemaining: Long = 65
     private var maxSeconds: Long = 65
     private var secondsNow: Long = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_timer)
         setSupportActionBar(toolbar)
-        //TODO: progressbar.progress = максимальная длина - (время таймера - текущее время)
-        //пример: = 60 - (60 - 2) = 2; 60 - (60 - 3) = 3 -> текущее время = progressbar.progress
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.statusBarColor = Color.parseColor("#4747d1")//цвет статусбара
+        }
         fab_start.setOnClickListener { view ->
             startTimer()
-            Snackbar.make(view, "Timer started", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+            updateButtonsUI()
+            //Snackbar.make(view, "Timer started", Snackbar.LENGTH_LONG).setAction("Action", null).show()
         }
         fab_stop.setOnClickListener { view ->
             stopTimer()
-            Snackbar.make(view, "Timer stopped", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+            updateButtonsUI()
+            //Snackbar.make(view, "Timer stopped", Snackbar.LENGTH_LONG).setAction("Action", null).show()
         }
         fab_pause.setOnClickListener { view ->
             pauseTimer()
-            Snackbar.make(view, "Timer paused", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+            updateButtonsUI()
+            //Snackbar.make(view, "Timer paused", Snackbar.LENGTH_LONG).setAction("Action", null).show()
         }
-        Util.setMaxSecondsForTimer(maxSeconds, this)//потом нужно заменить на get и делать set при выборе времени
-        Util.setTimeForTimer(Util.getMaxSecondsForTimer(this), this)
+        fab_add.setOnClickListener { view ->
+            showCreateCategoryDialog()
+        }
+        UtilTimer.setMaxSecondsForTimer(maxSeconds, this)//потом нужно заменить на get и делать set при выборе времени
+        UtilTimer.setTimeForTimer(UtilTimer.getMaxSecondsForTimer(this), this)
         progressBarTimer.max = maxSeconds.toInt()
         progressBarTimer.progress = 0
+
+        updateCountdownUI()
     }
     enum class TimerState{
         Stopped, Paused, Running
     }
     private fun startTimer(){
         timerState = TimerState.Running
-        secondsRemaining = Util.getTimeForTimer(this)
-        println("its" + Util.getTimeForTimer(this))
+        secondsRemaining = UtilTimer.getTimeForTimer(this)
+        println("its" + UtilTimer.getTimeForTimer(this))
 
         timer = object : CountDownTimer(secondsRemaining * 1000, 1000){
             override fun onFinish() = onTimerFinished()
@@ -67,13 +81,34 @@ class TimerActivity : AppCompatActivity() {
         else "0" + secondsStr}"
         progressBarTimer.progress = secondsNow.toInt()
     }
+    private fun updateButtonsUI(){
+        when (timerState){
+            TimerState.Running -> {
+                fab_add.isEnabled = false
+                fab_start.isEnabled = false
+                fab_pause.isEnabled = true
+                fab_stop.isEnabled = true
+            }
+            TimerState.Paused -> {
+                fab_add.isEnabled = false
+                fab_start.isEnabled = true
+                fab_pause.isEnabled = false
+                fab_stop.isEnabled = true
+            }
+            TimerState.Stopped -> {
+                fab_add.isEnabled = true
+                fab_start.isEnabled = true
+                fab_pause.isEnabled = false
+                fab_stop.isEnabled = false
+            }
+        }
+    }
     private fun onTimerFinished(){
         timerState = TimerState.Stopped
 
         //setNewTimerLength()
-
-        progressBarTimer.progress = 0
-
+        secondsNow = 0
+        progressBarTimer.max = UtilTimer.getMaxSecondsForTimer(this).toInt()
         //PrefUtil.setSecondsRemaining(timerLengthSeconds, this)
         secondsRemaining = maxSeconds
 
@@ -82,14 +117,56 @@ class TimerActivity : AppCompatActivity() {
     }
     private fun pauseTimer(){
         timerState = TimerState.Paused
-        Util.setTimeForTimer(secondsRemaining, this)
+        UtilTimer.setTimeForTimer(secondsRemaining, this)
         timer.cancel()
     }
     private fun stopTimer(){
+        secondsNow = 0
+        progressBarTimer.progress = 0
         timerState = TimerState.Stopped
         timer.cancel()
-        Util.setTimeForTimer(maxSeconds, this)
+        UtilTimer.setTimeForTimer(maxSeconds, this)
         secondsRemaining = maxSeconds
         updateCountdownUI()
+    }
+    private fun showCreateCategoryDialog() {
+        val context = this
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Min:sec")
+
+        // https://stackoverflow.com/questions/10695103/creating-custom-alertdialog-what-is-the-root-view
+        // Seems ok to inflate view with null rootView
+        val view = layoutInflater.inflate(R.layout.dialog_timer, null)
+
+        //val categoryEditText = view.findViewById(R.id.etTime) as EditText
+        //settings for numberpickers
+        view.findViewById<NumberPicker>(R.id.npMinute).minValue = 0
+        view.findViewById<NumberPicker>(R.id.npMinute).maxValue = 100
+        view.findViewById<NumberPicker>(R.id.npMinute).value = 1
+        view.findViewById<NumberPicker>(R.id.npSecond).minValue = 0
+        view.findViewById<NumberPicker>(R.id.npSecond).maxValue = 59
+        view.findViewById<NumberPicker>(R.id.npSecond).value = 10
+
+        builder.setView(view)
+
+        // set up the ok button
+        builder.setPositiveButton(android.R.string.ok) { dialog, p1 ->
+            /*UtilTimer.setMaxSecondsForTimer(categoryEditText.text.toString().toLong(), context)
+            UtilTimer.setTimeForTimer(categoryEditText.text.toString().toLong(), context)*/
+            val time: Long =  view.findViewById<NumberPicker>(R.id.npMinute).value * 60L + view.findViewById<NumberPicker>(R.id.npSecond).value
+            UtilTimer.setMaxSecondsForTimer(time, context)
+            UtilTimer.setTimeForTimer(time, context)
+            maxSeconds = UtilTimer.getMaxSecondsForTimer(context)
+            secondsRemaining = maxSeconds
+            progressBarTimer.max = maxSeconds.toInt()
+            progressBarTimer.progress = 0
+            updateCountdownUI()
+        }
+
+        builder.setNegativeButton(android.R.string.cancel) { dialog, p1 ->
+            dialog.cancel()
+        }
+
+        builder.show()
     }
 }

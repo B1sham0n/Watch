@@ -24,7 +24,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setContentView(R.layout.activity_main)
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
-
         val fab: FloatingActionButton = findViewById(R.id.fab)
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -79,6 +78,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 println("its timer")
             }
             R.id.nav_stopwatch -> {
+                val intent = Intent(this, StopwatchActivity::class.java)
+                startActivity(intent)
                 Toast.makeText(this, "its stopwatch", Toast.LENGTH_LONG)
                 println("its stopwatch")
             }

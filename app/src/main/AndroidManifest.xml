@@ -10,6 +10,11 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity
+                android:name=".StopwatchActivity"
+                android:label="@string/title_activity_stopwatch"
+                android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+        <activity
                 android:name=".TimerActivity"
                 android:label="@string/title_activity_timer"
                 android:theme="@style/AppTheme.NoActionBar">
