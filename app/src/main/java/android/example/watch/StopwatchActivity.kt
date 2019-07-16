@@ -18,11 +18,9 @@ class StopwatchActivity : AppCompatActivity() {
     var stopwatchState = StopwatchState.Paused
     var enableStartBtnState = StopwatchState.Paused
     var StartTime = 0L
-    var TimeBuff = 0L
     var MillisecondTime = 0L
     var UpdateTime = 0L
     var handler: Handler = Handler()
-    var listTimer: ArrayList<Long> = ArrayList()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_stopwatch)
@@ -31,7 +29,7 @@ class StopwatchActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             window.statusBarColor = Color.parseColor("#4747d1")//цвет статусбара
         }
-        //TODO: сделать класс UtilStopwatch и хранить там время (мб timebuff и arraylist)
+        //TODO:в основном экране сделать текущее время (мб сделать добавление времени других стран)
         fab_start.setOnClickListener { view ->
             //startStopwatch()
             functionalStartButton()
@@ -49,6 +47,19 @@ class StopwatchActivity : AppCompatActivity() {
             updateEnableButtonsUI()
             //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show()
         }
+        printSavedTimer()
+        //printInTV(tvStopwatch, UtilStopwatch.getCurrentTime(this))
+    }
+
+    override fun onPause() {
+        super.onPause()
+        UtilStopwatch.setCurrentTime(UpdateTime, this)
+        handler.removeCallbacks(runnable)
+        println((
+                "" + (UpdateTime/ 1000) / 60 + ":"
+                        + String.format("%02d", (UpdateTime / 1000) % 60) + ":"
+                        + String.format("%03d", UpdateTime % 1000)
+                ))
     }
     enum class StopwatchState{ Running, Paused}
     private fun startStopwatch(){
@@ -59,13 +70,17 @@ class StopwatchActivity : AppCompatActivity() {
     }
     private fun pauseStopwatch(){
         stopwatchState = StopwatchState.Paused
-        TimeBuff += MillisecondTime
+        UtilStopwatch.setTimeBuff((UtilStopwatch.getTimeBuff(this) + MillisecondTime), this)
+        //TimeBuff += MillisecondTime
         handler.removeCallbacks(runnable)
     }
     private fun restartStopwatch(){
         stopwatchState = StopwatchState.Paused
         StartTime = 0
-        TimeBuff = 0
+        UtilStopwatch.setTimeBuff(0, this)
+        UtilStopwatch.setCurrentTime(0, this)
+        UpdateTime = 0
+        //TimeBuff = 0
         MillisecondTime = 0
         tvStopwatch.text = "00:00:00"
         handler.removeCallbacks(runnable)
@@ -83,36 +98,38 @@ class StopwatchActivity : AppCompatActivity() {
         }
     }
     private fun saveTimer(){
-        var Seconds = 0L
-        var Minutes = 0L
-        var MilliSeconds = 0L
         var tempMillisecondTime = 0L
         MillisecondTime = SystemClock.uptimeMillis() - StartTime
-        UpdateTime = TimeBuff + MillisecondTime
-        listTimer.add(UpdateTime)
-        Seconds = (UpdateTime / 1000)
-        Minutes = Seconds / 60
-        Seconds = Seconds % 60
-        MilliSeconds = (UpdateTime % 1000)
+        //UpdateTime = TimeBuff + MillisecondTime
+        UpdateTime = UtilStopwatch.getTimeBuff(this) + MillisecondTime
+        UtilStopwatch.setNewTimerInList(UpdateTime)
         val layoutInflater : LayoutInflater = LayoutInflater.from(applicationContext)
         val view : View = layoutInflater.inflate(R.layout.inflater_timer_stopwatch, parentLayout, false)
-        view.findViewById<TextView>(R.id.tvIntervalStopwatch).text = "Interval " + listTimer.size
-        view.findViewById<TextView>(R.id.tvTimerStopwatch).text = (
-                "" + Minutes + ":"
-                        + String.format("%02d", Seconds) + ":"
-                        + String.format("%03d", MilliSeconds)
-                )
-        if(listTimer.size > 1 && (listTimer.get(listTimer.size-1) > listTimer.get(listTimer.size-2))){
+        view.findViewById<TextView>(R.id.tvIntervalStopwatch).text = "Interval " + UtilStopwatch.getListTimerLength(applicationContext)
+        printInTV(view.findViewById<TextView>(R.id.tvTimerStopwatch), UpdateTime)
+        if(UtilStopwatch.getListTimerLength(applicationContext) > 1 &&
+            (UtilStopwatch.getTimerFromList(UtilStopwatch.getListTimerLength(applicationContext) - 1) > (UtilStopwatch
+                .getTimerFromList(UtilStopwatch.getListTimerLength(applicationContext) - 2)))){
             //вторая проверка - защита от отрицательных значений после restart timer
-            tempMillisecondTime = listTimer.get(listTimer.size - 2)
+            tempMillisecondTime = UtilStopwatch.getTimerFromList(UtilStopwatch.getListTimerLength(applicationContext) - 2)
             tempMillisecondTime = UpdateTime - tempMillisecondTime
         }
-        view.findViewById<TextView>(R.id.tvDurationStopwatch).text = (
-                "Duration: " +(tempMillisecondTime / 1000)/ 60 + ":"
-                        + String.format("%02d", (tempMillisecondTime / 1000)) + ":"
-                        + String.format("%03d", (tempMillisecondTime % 1000))
-                )
+        printInTV( view.findViewById<TextView>(R.id.tvDurationStopwatch), tempMillisecondTime)
         parentLayout.addView(view)
+    }
+    private fun printSavedTimer(){
+        if(UtilStopwatch.getCurrentTime(this) > 0){
+            UpdateTime = UtilStopwatch.getCurrentTime(applicationContext) + MillisecondTime
+            printInTV(tvStopwatch, UpdateTime)
+            UtilStopwatch.setTimeBuff(UpdateTime, this)//чтобы включить таймер с сохраненного времени
+        }
+    }
+    private fun printInTV(textView: TextView, time: Long){
+        textView.text = (
+                "" + (time / 1000) / 60 + ":"
+                        + String.format("%02d", (time / 1000) % 60) + ":"
+                        + String.format("%03d", time % 1000)
+                )
     }
     private fun updateEnableButtonsUI(){
         when(stopwatchState){
@@ -140,16 +157,14 @@ class StopwatchActivity : AppCompatActivity() {
          var MilliSeconds = 0L
         override fun run() {
             MillisecondTime = SystemClock.uptimeMillis() - StartTime
-            UpdateTime = TimeBuff + MillisecondTime
+            //UpdateTime = TimeBuff + MillisecondTime
+            UpdateTime = UtilStopwatch.getTimeBuff(applicationContext) + MillisecondTime
             Seconds = (UpdateTime / 1000)
             Minutes = Seconds / 60
             Seconds = Seconds % 60
             MilliSeconds = (UpdateTime % 1000)
-            tvStopwatch.text = (
-               "" + Minutes + ":"
-               + String.format("%02d", Seconds) + ":"
-               + String.format("%03d", MilliSeconds)
-            )
+            printInTV(tvStopwatch, UpdateTime)
+            //UtilStopwatch.setCurrentTime(UpdateTime, applicationContext)
             handler.postDelayed(this, 0)
         }
     }
