@@ -31,7 +31,8 @@
             android:layout_margin="@dimen/fab_margin"
             app:srcCompat="@drawable/ic_refresh"
             android:tint="@android:color/white"
-            tools:ignore="VectorDrawableCompat"/>
+            tools:ignore="VectorDrawableCompat"
+            />
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_start"
             android:layout_width="wrap_content"
@@ -40,14 +41,15 @@
             android:layout_margin="@dimen/fab_margin"
             app:srcCompat="@drawable/ic_start"
             android:tint="@android:color/white"
+            android:backgroundTint="@color/enableButtons"
             tools:ignore="VectorDrawableCompat"/>
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_pause"
+            android:id="@+id/fab_timer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_pause"
+            app:srcCompat="@drawable/ic_timer"
             android:tint="@android:color/white"
             tools:ignore="VectorDrawableCompat"/>
 

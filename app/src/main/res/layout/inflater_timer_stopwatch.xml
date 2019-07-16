@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_margin="2dp">
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+        <TextView
+                android:id="@+id/tvIntervalStopwatch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:layout_weight="1"
+                tools:text="Time interval"
+                android:textSize="20sp"
+                />
+        <TextView
+                android:id="@+id/tvTimerStopwatch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:layout_weight="1"
+                tools:text="0:22:365"
+                android:textSize="20sp"
+        />
+    </LinearLayout>
+    <TextView
+            android:id="@+id/tvDurationStopwatch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Duration: 2:02:123"
+            android:textSize="14sp"/>
+</LinearLayout>

@@ -1,5 +1,4 @@
 package android.example.watch
-
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -13,9 +12,6 @@ import kotlinx.android.synthetic.main.activity_timer.*
 import kotlinx.android.synthetic.main.content_timer.*
 import android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
 import android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-
-
-
 class TimerActivity : AppCompatActivity() {
     private lateinit var timer: CountDownTimer
     private var timerState = TimerState.Stopped
@@ -26,6 +22,7 @@ class TimerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_timer)
         setSupportActionBar(toolbar)
+        //TODO: возможно, нужно сделать отдельный UtilButtons для обновления цветов (и мб enable) кнопок
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             window.statusBarColor = Color.parseColor("#4747d1")//цвет статусбара
         }

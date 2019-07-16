@@ -11,27 +11,35 @@
         android:orientation="vertical">
         <TextView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:gravity="center|top"
-                android:text="Your time:"
-                android:textSize="30dp"
-                android:layout_weight="1"/>
+                android:text="Your stopwatch:"
+                android:textSize="30sp"
+                android:layout_weight="2"/>
         <TextView
                 android:id="@+id/tvStopwatch"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:gravity="center"
                 android:text="00:00:00"
-                android:textSize="50dp"
-                android:layout_weight="1"/>
+                android:textSize="60sp"
+                android:layout_weight="2"/>
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_weight="1">
         <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:layout_marginBottom="80dp">
             <LinearLayout
+                    android:id="@+id/parentLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-            android:orientation="vertical"></LinearLayout>
+                    android:orientation="vertical">
+            </LinearLayout>
         </ScrollView>
+        </LinearLayout>
 </LinearLayout>
