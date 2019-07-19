@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#8080ff</color>
-    <color name="colorPrimaryDark"> #4747d1</color>
+    <color name="colorPrimary">#00004d</color>
+    <color name="colorPrimaryDark">#000033</color>
     <color name="colorAccent">#D81B60</color>
     <color name="disableButtons">#b30000</color>
     <color name="enableButtons">#ff0000</color>
     <color name="moreLightGray">#f2f2f2</color>
     <color name="lightGray">#e6e6e6</color>
+    <color name="bcgGradientStart">#00004d</color>
+    <color name="bcgGradientCenter">#000080</color>
+    <color name="bcgGradientEnd">#000033</color>
 </resources>

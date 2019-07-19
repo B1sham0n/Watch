@@ -1,8 +1,10 @@
 package android.example.watch
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.os.SystemClock
 import android.view.LayoutInflater
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -24,12 +26,11 @@ import kotlinx.android.synthetic.main.content_stopwatch.*
 import kotlinx.android.synthetic.main.content_timer.*
 import java.util.*
 import android.widget.ImageButton
-
-
-
+import androidx.core.os.postDelayed
+import android.content.Context.LAYOUT_INFLATER_SERVICE
+import androidx.core.content.ContextCompat.getSystemService
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-
-
+    val handler: Handler = Handler()
     @SuppressLint("ShowToast")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,9 +40,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val fab: FloatingActionButton = findViewById(R.id.fab)
         fab.setOnClickListener { view ->
             showCreateCategoryDialog()
-            //TODO: добавить ОБНОВЛЕНИЕ текущего и другого времени в textview
-            //TODO: возможно, нужно создать UtilWatch для выбора и отображения времени
-            //TODO: возможно, стоит добавить БД, в которой будет храниться выбранное GMT, и засунуть ее в UtilWatch
+            //TODO: ОБЯЗАТЕЛЬНО добавить БД, в которой будет храниться выбранное GMT, и засунуть ее в UtilWatch
         }
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
@@ -53,26 +52,63 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
 
         navView.setNavigationItemSelectedListener(this)
-
+        handler.postDelayed(runnable, 0)
     }
-    private fun createTimeGMT(nameCity: String, timezone: String){
-
+    private fun createTimeGMT(nameCity: String, timeZoneString: String){
         val layoutInflater : LayoutInflater = LayoutInflater.from(applicationContext)
         val view : View = layoutInflater.inflate(R.layout.inflater_timezone_main, parentLayoutWatchGMT, false)
-
-        val tz = TimeZone.getTimeZone(timezone)
-
+        val tz = TimeZone.getTimeZone(timeZoneString)
         val c = Calendar.getInstance(tz)
         var time = String.format("%02d" , c.get(Calendar.HOUR_OF_DAY))+":"+
-                String.format("%02d" , c.get(Calendar.MINUTE))
+                String.format("%02d" , c.get(Calendar.MINUTE))+":"+
+                String.format("%03d" , c.get(Calendar.SECOND))
         view.findViewById<TextView>(R.id.tvTimeGMT).text = time
+        view.findViewById<TextView>(R.id.tvTimeGMT).tag = timeZoneString
         view.findViewById<TextView>(R.id.tvNameGMT).text = nameCity
         view.findViewById<Button>(R.id.btnCancelGMT).setOnClickListener(btnCancelListener)
         view.findViewById<Button>(R.id.btnCancelGMT).tag = "cancel"
         view.findViewById<Button>(R.id.btnCancelGMT).id = parentLayoutWatchGMT.childCount
+        //handler.postDelayed(runnable,0)
         parentLayoutWatchGMT.addView(view)
+        //println(view.findViewById<TextView>(R.id.tvTimeGMT).tag.toString()  + "here")
+        myRun.myRun(parentLayoutWatchGMT)
+        var runn  = myRun.myRun(parentLayoutWatchGMT)
+        handler.postDelayed(runn.run {myRun}, 0)
     }
-    val btnCancelListener = View.OnClickListener {view ->
+    class myRun  {
+        companion object : Runnable {
+            var handler: Handler = Handler()
+            lateinit var view : LinearLayout
+            public fun myRun(view1: LinearLayout){
+                this.view = view1
+            }
+            override fun run() {
+                var i = 0
+                while(i < view.childCount){
+                    val child = view.getChildAt(i)
+                    val tz = TimeZone.getTimeZone(child.findViewById<TextView>(R.id.tvTimeGMT).tag.toString())
+                    val c = Calendar.getInstance(tz)
+                    var time = String.format("%02d" , c.get(Calendar.HOUR_OF_DAY))+":"+
+                            String.format("%02d" , c.get(Calendar.MINUTE))
+                    child.findViewById<TextView>(R.id.tvTimeGMT).text = time
+                    i++
+                }
+                handler.postDelayed(this, 0)
+                //TODO как передать переменную?
+            }
+        }
+    }
+    var runnable: Runnable =  object:Runnable {
+        var tz: TimeZone? = TimeZone.getDefault()
+        override fun run() {
+            val c = Calendar.getInstance(tz)
+            var time = String.format("%02d" , c.get(Calendar.HOUR_OF_DAY))+":"+
+                    String.format("%02d" , c.get(Calendar.MINUTE))
+            tvTimeGMT.text = time
+            handler.postDelayed(this, 0)
+        }
+    }
+    private val btnCancelListener = View.OnClickListener { view ->
         parentLayoutWatchGMT.removeViewAt(view.id)
         updateIdButton()
     }
