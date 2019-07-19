@@ -3,15 +3,13 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.view.View
 import android.widget.NumberPicker
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity;
 
 import kotlinx.android.synthetic.main.activity_timer.*
 import kotlinx.android.synthetic.main.content_timer.*
-import android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-import android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+
 class TimerActivity : AppCompatActivity() {
     private lateinit var timer: CountDownTimer
     private var timerState = TimerState.Stopped
@@ -24,21 +22,21 @@ class TimerActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         //TODO: возможно, нужно сделать отдельный UtilButtons для обновления цветов (и мб enable) кнопок
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.statusBarColor = Color.parseColor("#4747d1")//цвет статусбара
+            window.statusBarColor = Color.parseColor("#000033")//цвет статусбара
         }
         fab_start.setOnClickListener { view ->
             startTimer()
-            updateButtonsUI()
+            UtilButtons.updateButtonsTimer(timerState, fab_add, fab_start, fab_pause, fab_stop, this)
             //Snackbar.make(view, "Timer started", Snackbar.LENGTH_LONG).setAction("Action", null).show()
         }
         fab_stop.setOnClickListener { view ->
             stopTimer()
-            updateButtonsUI()
+            UtilButtons.updateButtonsTimer(timerState, fab_add, fab_start, fab_pause, fab_stop, this)
             //Snackbar.make(view, "Timer stopped", Snackbar.LENGTH_LONG).setAction("Action", null).show()
         }
         fab_pause.setOnClickListener { view ->
             pauseTimer()
-            updateButtonsUI()
+            UtilButtons.updateButtonsTimer(timerState, fab_add, fab_start, fab_pause, fab_stop, this)
             //Snackbar.make(view, "Timer paused", Snackbar.LENGTH_LONG).setAction("Action", null).show()
         }
         fab_add.setOnClickListener { view ->
@@ -50,6 +48,7 @@ class TimerActivity : AppCompatActivity() {
         progressBarTimer.progress = 0
 
         updateCountdownUI()
+        UtilButtons.updateButtonsTimer(timerState, fab_add, fab_start, fab_pause, fab_stop, this)
     }
     enum class TimerState{
         Stopped, Paused, Running
@@ -77,28 +76,6 @@ class TimerActivity : AppCompatActivity() {
         if(secondsStr.length == 2) secondsStr
         else "0" + secondsStr}"
         progressBarTimer.progress = secondsNow.toInt()
-    }
-    private fun updateButtonsUI(){
-        when (timerState){
-            TimerState.Running -> {
-                fab_add.isEnabled = false
-                fab_start.isEnabled = false
-                fab_pause.isEnabled = true
-                fab_stop.isEnabled = true
-            }
-            TimerState.Paused -> {
-                fab_add.isEnabled = false
-                fab_start.isEnabled = true
-                fab_pause.isEnabled = false
-                fab_stop.isEnabled = true
-            }
-            TimerState.Stopped -> {
-                fab_add.isEnabled = true
-                fab_start.isEnabled = true
-                fab_pause.isEnabled = false
-                fab_stop.isEnabled = false
-            }
-        }
     }
     private fun onTimerFinished(){
         timerState = TimerState.Stopped

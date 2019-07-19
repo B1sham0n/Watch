@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         fab.setOnClickListener { view ->
             showCreateCategoryDialog()
             //TODO: ОБЯЗАТЕЛЬНО добавить БД, в которой будет храниться выбранное GMT, и засунуть ее в UtilWatch
+            //TODO: в онпауз удалять поток с обновлением
         }
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)

@@ -18,6 +18,8 @@
                 android:layout_weight="1"
                 tools:text="Time interval"
                 android:textSize="20sp"
+                android:textColor="@android:color/white"
+                tools:textColor="@android:color/black"
                 />
         <TextView
                 android:id="@+id/tvTimerStopwatch"
@@ -27,6 +29,8 @@
                 android:layout_weight="1"
                 tools:text="0:22:365"
                 android:textSize="20sp"
+                android:textColor="@android:color/white"
+                tools:textColor="@android:color/black"
         />
     </LinearLayout>
     <TextView
@@ -34,5 +38,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:text="Duration: 2:02:123"
-            android:textSize="14sp"/>
+            android:textSize="14sp"
+            android:textColor="@android:color/white"
+            tools:textColor="@android:color/black"/>
 </LinearLayout>
