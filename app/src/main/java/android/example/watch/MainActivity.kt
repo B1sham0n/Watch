@@ -28,8 +28,11 @@ import java.util.*
 import android.widget.ImageButton
 import androidx.core.os.postDelayed
 import android.content.Context.LAYOUT_INFLATER_SERVICE
+import android.example.watch.Utils.UtilCitiesList
 import android.example.watch.Utils.UtilWatch
 import androidx.core.content.ContextCompat.getSystemService
+import kotlin.collections.ArrayList
+
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     val handler: Handler = Handler()
     @SuppressLint("ShowToast")
@@ -148,19 +151,26 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Seems ok to inflate view with null rootView
         val view = layoutInflater.inflate(R.layout.dialog_watch, null)
         //settings for numberpickers
-        val arrayString = arrayOf("Moscow GMT+3","Paris GMT+2","London GMT+1","Reykjavik GMT","Washington GMT-4")
+        //val arrayString = arrayOf("Moscow GMT+3","Paris GMT+2","London GMT+1","Reykjavik GMT","Washington GMT-4")
+        val array: ArrayList<String> = ArrayList()
+        for (cl in UtilCitiesList.CitiesList.values()){
+            array.add(cl.cityName + " " + cl.GMT)
+        }
+        val items = arrayOfNulls<String>(array.size)
+        array.toArray(items)
         view.findViewById<NumberPicker>(R.id.npGMT).minValue = 0
-        view.findViewById<NumberPicker>(R.id.npGMT).maxValue = arrayString.size - 1
-        view.findViewById<NumberPicker>(R.id.npGMT).displayedValues = arrayString
+        view.findViewById<NumberPicker>(R.id.npGMT).maxValue = UtilCitiesList.getCitiesSize()
+        view.findViewById<NumberPicker>(R.id.npGMT).displayedValues = items
+        //println(array.size.toString() + "  " + array.get(0) + "!!!!!!!!!! ")
         builder.setView(view)
 
         // set up the ok button
         builder.setPositiveButton(android.R.string.ok) { dialog, p1 ->
             val str = view.findViewById<NumberPicker>(R.id.npGMT).value// + ":" +
                     //view.findViewById<NumberPicker>(R.id.npMinuteGMT).value.toString()
-            val nameAndGMT = arrayString.get(str)
-            val nameAndGMTArray = nameAndGMT.split(" ")//[0] - city name, [1] - city GMT
-            createTimeGMT(nameAndGMTArray[0], nameAndGMTArray[1], true)
+            val nameAndGMT = items.get(str)
+            val nameAndGMTArray = nameAndGMT?.split(" ")//[0] - city name, [1] - city GMT
+            createTimeGMT(nameAndGMTArray!![0], nameAndGMTArray[1], true)
         }
         builder.setNegativeButton(android.R.string.cancel) { dialog, p1 ->
             dialog.cancel()
