@@ -1,4 +1,4 @@
-package android.example.watch
+package android.example.watch.Utils
 
 import android.content.Context
 import android.preference.PreferenceManager

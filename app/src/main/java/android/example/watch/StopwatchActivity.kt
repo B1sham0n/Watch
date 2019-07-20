@@ -1,5 +1,7 @@
 package android.example.watch
 
+import android.example.watch.Utils.UtilButtons
+import android.example.watch.Utils.UtilStopwatch
 import android.graphics.Color
 import android.os.*
 import android.view.LayoutInflater

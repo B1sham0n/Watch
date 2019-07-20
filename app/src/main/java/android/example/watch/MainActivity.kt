@@ -28,6 +28,7 @@ import java.util.*
 import android.widget.ImageButton
 import androidx.core.os.postDelayed
 import android.content.Context.LAYOUT_INFLATER_SERVICE
+import android.example.watch.Utils.UtilWatch
 import androidx.core.content.ContextCompat.getSystemService
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     val handler: Handler = Handler()
@@ -41,7 +42,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         fab.setOnClickListener { view ->
             showCreateCategoryDialog()
             //TODO: ОБЯЗАТЕЛЬНО добавить БД, в которой будет храниться выбранное GMT, и засунуть ее в UtilWatch
-            //TODO: в онпауз удалять поток с обновлением
         }
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
@@ -51,11 +51,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         )
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
-
         navView.setNavigationItemSelectedListener(this)
         handler.postDelayed(runnable, 0)
+        //UtilWatch.removeAllDB(this)
+        if(UtilWatch.getCountOnDB(this) > 0){
+            showSavedWatches()
+        }
     }
-    private fun createTimeGMT(nameCity: String, timeZoneString: String){
+
+    private fun showSavedWatches() {
+        val count = UtilWatch.getCountOnDB(this)
+        for(i in 0 until count){
+            val timeZoneString = UtilWatch.getGMTFromDB(i, this)
+            val nameCity = UtilWatch.getCityFromDB(i, this)
+            createTimeGMT(nameCity, timeZoneString, false)
+        }
+    }
+
+    private fun createTimeGMT(nameCity: String, timeZoneString: String, addToDB: Boolean){
         val layoutInflater : LayoutInflater = LayoutInflater.from(applicationContext)
         val view : View = layoutInflater.inflate(R.layout.inflater_timezone_main, parentLayoutWatchGMT, false)
         val tz = TimeZone.getTimeZone(timeZoneString)
@@ -69,12 +82,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         view.findViewById<Button>(R.id.btnCancelGMT).setOnClickListener(btnCancelListener)
         view.findViewById<Button>(R.id.btnCancelGMT).tag = "cancel"
         view.findViewById<Button>(R.id.btnCancelGMT).id = parentLayoutWatchGMT.childCount
-        //handler.postDelayed(runnable,0)
+        if(addToDB)
+            UtilWatch.addWatchToDB(nameCity, timeZoneString, this)
         parentLayoutWatchGMT.addView(view)
-        //println(view.findViewById<TextView>(R.id.tvTimeGMT).tag.toString()  + "here")
         myRun.myRun(parentLayoutWatchGMT)
-        var runn  = myRun.myRun(parentLayoutWatchGMT)
-        handler.postDelayed(runn.run {myRun}, 0)
+       // var runn  = myRun.myRun(parentLayoutWatchGMT)
+        handler.postDelayed(myRun, 0)
     }
     class myRun  {
         companion object : Runnable {
@@ -111,6 +124,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
     private val btnCancelListener = View.OnClickListener { view ->
         parentLayoutWatchGMT.removeViewAt(view.id)
+        UtilWatch.removeIdFromDB(view.id, this)//удаление этого города из БД
         updateIdButton()
     }
     private fun updateIdButton() {
@@ -146,7 +160,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     //view.findViewById<NumberPicker>(R.id.npMinuteGMT).value.toString()
             val nameAndGMT = arrayString.get(str)
             val nameAndGMTArray = nameAndGMT.split(" ")//[0] - city name, [1] - city GMT
-            createTimeGMT(nameAndGMTArray[0], nameAndGMTArray[1])
+            createTimeGMT(nameAndGMTArray[0], nameAndGMTArray[1], true)
         }
         builder.setNegativeButton(android.R.string.cancel) { dialog, p1 ->
             dialog.cancel()
